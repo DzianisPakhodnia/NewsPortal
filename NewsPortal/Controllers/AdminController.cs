@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NewsPortal.Services.Implementations;
 using NewsPortal.Services.Interfaces;
 
 namespace NewsPortal.Controllers
@@ -6,15 +7,17 @@ namespace NewsPortal.Controllers
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
+        private readonly INewsService _newsService;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, INewsService newsService)
         {
-
             _adminService = adminService;
+            _newsService = newsService;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var newsList = await _newsService.GetAllNewsAsync();
+            return View(newsList);
         }
 
         [HttpGet]
