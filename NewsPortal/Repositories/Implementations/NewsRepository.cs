@@ -3,7 +3,7 @@ using NewsPortal.Repositories.Interfaces;
 using NewsPortal.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace NewsPortal.Repositories
+namespace NewsPortal.Repositories.Implementations
 {
     public class NewsRepository : INewsRepository
     {

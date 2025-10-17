@@ -29,16 +29,18 @@ namespace NewsPortal.Controllers
             return View();
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetNews(int id)
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
         {
-            var news = await _newsService.GetNewsByIdAsync(id);
-            if (news == null)
+            var newsItem = await _newsService.GetNewsByIdAsync(id);
+            if (newsItem == null)
             {
                 return NotFound();
             }
-            return View(news);
+
+            return View(newsItem);
         }
+
 
 
         [HttpPut]

@@ -54,7 +54,7 @@ namespace NewsPortal.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("News");
+                    b.ToTable("News", (string)null);
                 });
 
             modelBuilder.Entity("NewsPortal.Models.User", b =>
@@ -83,7 +83,7 @@ namespace NewsPortal.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 #pragma warning restore 612, 618
         }

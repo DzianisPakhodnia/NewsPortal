@@ -1,1 +1,24 @@
-﻿
+﻿@model NewsPortal.Models.News
+
+@{
+    ViewData["Title"] = @Model.Title;
+}
+
+<div class="container my-5">
+    <div class="card shadow-sm border-0">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Title" style="max-height: 500px; object-fit: cover;">
+        }
+        <div class="card-body">
+            <h1 class="card-title">@Model.Title</h1>
+            @if (!string.IsNullOrEmpty(Model.Subtitle))
+            {
+                <h4 class="text-muted mb-3">@Model.Subtitle</h4>
+            }
+            <small class="text-muted mb-3 d-block">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+            <p class="card-text">@Model.Text</p>
+            <a href="@Url.Action("Index", "News")" class="btn btn-secondary mt-3">Назад к новостям</a>
+        </div>
+    </div>
+</div>

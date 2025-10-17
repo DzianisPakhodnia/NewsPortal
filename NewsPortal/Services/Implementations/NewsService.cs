@@ -1,8 +1,9 @@
-﻿using NewsPortal.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using NewsPortal.Models;
 using NewsPortal.Repositories.Interfaces;
 using NewsPortal.Services.Interfaces;
 
-namespace NewsPortal.Services
+namespace NewsPortal.Services.Implementations
 {
     public class NewsService : INewsService
     {
@@ -12,22 +13,22 @@ namespace NewsPortal.Services
             _newsRepository = newsRepository;
         }
 
-        public Task<IList<News>> GetAllNewsAsync()
+        public async Task<IList<News>> GetAllNewsAsync()
         {
-            return _newsRepository.GetAllNews();
+            return await _newsRepository.GetAllNews();
         }
 
-        public Task<News> GetNewsByIdAsync(int id)
+        public async Task<News> GetNewsByIdAsync(int id)
         {
-            return _newsRepository.GetNewsById(id);
+            return await _newsRepository.GetNewsById(id);
         }
 
-        public Task<News> AddNewsAsync(News news)
+        public async Task<News> AddNewsAsync(News news)
         {
             throw new NotImplementedException();
         }
 
-        public Task UpdateNewsAsync(News news)
+        public  Task UpdateNewsAsync(News news)
         {
             return _newsRepository.UpdateNews(news);
         }

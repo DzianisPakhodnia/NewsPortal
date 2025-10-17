@@ -4,35 +4,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - NewsPortal</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/NewsPortal.styles.css" asp-append-version="true" />
+
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom shadow-sm mb-3">
-            <div class="container">
-                
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Переключить навигацию">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-            </div>
-        </nav>
+        <span>
+            <nav>
+                <a href="/">Главная</a>
+                <a href="/contacts">Объява</a>
+
+            </nav>
+        </span>
     </header>
-
-    <div class="container pb-5">
-        <main role="main" class="mt-4">
-            @RenderBody()
-        </main>
-    </div>
-
-   
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    <main>
+        @RenderBody()
+    </main>
+    <footer>Все права защищены</footer>
 </body>
 </html>
