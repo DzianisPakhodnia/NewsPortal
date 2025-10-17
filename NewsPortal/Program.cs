@@ -5,7 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 string? connection = builder.Configuration.GetConnectionString("DatabaseConnection");
 
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connection));
 
