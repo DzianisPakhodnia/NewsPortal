@@ -1,0 +1,26 @@
+﻿@model List<NewsPortal.Models.News>
+
+@{
+    ViewData["Title"] = "Новости";
+}
+
+<h1 class="mb-4">Новости</h1>
+
+<div class="row">
+    @foreach (var news in Model)
+    {
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                @if (!string.IsNullOrEmpty(news.ImageUrl))
+                {
+                    <img src="@news.ImageUrl" class="card-img-top" alt="@news.Title">
+                }
+                <div class="card-body">
+                    <h5 class="card-title">@news.Title</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@news.Subtitle</h6>
+                    <p class="card-text">@news.Text</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

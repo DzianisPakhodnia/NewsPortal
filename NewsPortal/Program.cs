@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using NewsPortal.Data;
+using NewsPortal.Repositories;
+using NewsPortal.Repositories.Interfaces;
+using NewsPortal.Services;
+using NewsPortal.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +13,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connection));
 
 
+builder.Services.AddScoped<INewsRepository, NewsRepository>();
+builder.Services.AddScoped<INewsService, NewsService>();
+
 builder.Services.AddControllersWithViews();
+
+
+
+
 
 var app = builder.Build();
 

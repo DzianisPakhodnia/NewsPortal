@@ -1,0 +1,6 @@
+services:
+  newsportal:
+    image: ${DOCKER_REGISTRY-}newsportal
+    build:
+      context: .
+      dockerfile: NewsPortal/Dockerfile
