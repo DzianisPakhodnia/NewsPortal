@@ -7,6 +7,10 @@ namespace NewsPortal.Data
         public DbSet<User> Users { get; set; }
         public DbSet<News> News { get; set; }
 
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+            
+        }
 
 
 
