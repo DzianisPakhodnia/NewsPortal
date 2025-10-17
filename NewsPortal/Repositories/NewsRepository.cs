@@ -41,7 +41,6 @@ namespace NewsPortal.Repositories
             return await _applicationDbContext.News.FindAsync(id);
         }
 
-
         public async Task UpdateNews(News news)
         {
             _applicationDbContext.News.Update(news);
