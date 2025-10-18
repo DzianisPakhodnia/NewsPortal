@@ -8,9 +8,11 @@ namespace NewsPortal.Services.Implementations
     public class NewsService : INewsService
     {
         private readonly INewsRepository _newsRepository;
-        public NewsService(INewsRepository newsRepository) 
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public NewsService(INewsRepository newsRepository,IWebHostEnvironment webHostEnvironment) 
         { 
             _newsRepository = newsRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<IList<News>> GetAllNewsAsync()
@@ -23,12 +25,25 @@ namespace NewsPortal.Services.Implementations
             return await _newsRepository.GetNewsById(id);
         }
 
-        public async Task<News> AddNewsAsync(News news)
+        public async Task<News> CreateNewsAsync(News news)
         {
-            _newsRepository.AddNews(news);
+            if (news.ImageFile != null && news.ImageFile.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
 
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(news.ImageFile.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
 
-            
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await news.ImageFile.CopyToAsync(stream);
+
+                news.ImageUrl = "/images/" + fileName;
+            }
+
+            news.CreatedAt = DateTime.UtcNow;
+            await _newsRepository.AddNews(news);
 
             return news;
         }
@@ -43,5 +58,6 @@ namespace NewsPortal.Services.Implementations
             return _newsRepository.DeleteNews(id);
         }
 
+        
     }
 }

@@ -3,10 +3,10 @@
 @{
     ViewData["Title"] = "Новости";
 }
-
+<link rel="stylesheet" href="~/css/news.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <div class="container-fluid py-5 bg-light">
     <div class="container">
-        <!-- Заголовок -->
         <div class="row mb-5">
             <div class="col-12">
                 <h1 class="display-4 fw-bold text-primary mb-2">Новости</h1>
@@ -75,49 +75,3 @@
     </div>
 </div>
 
-<!-- Стили -->
-<style>
-    .news-admin-card {
-        border-radius: 16px;
-        transition: all 0.3s ease;
-        overflow: hidden;
-    }
-
-    .shadow-hover {
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-
-    .news-admin-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    }
-
-    .card-image-container {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    .line-clamp-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    a.text-decoration-none {
-        color: inherit;
-    }
-
-        a.text-decoration-none:hover {
-            text-decoration: none;
-        }
-</style>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">

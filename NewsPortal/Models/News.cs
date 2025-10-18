@@ -4,32 +4,25 @@ namespace NewsPortal.Models
 {
     public class News
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Заголовок обязателен")]
         public string Title { get; set; }
 
-
-        [Required(ErrorMessage = "Подзаголовок обязателен")]
-        public string Subtitle { get; set; }
-        
+        public string? Subtitle { get; set; }
 
         [Required(ErrorMessage = "Текст обязателен")]
         public string Text { get; set; }
 
+        public string? ImageUrl { get; set; }
 
-        [Required(ErrorMessage = "Изображение обязателено")]
-        [Url(ErrorMessage = "Некорректный URL изображения")]
-        public string ImageUrl { get; set; }
-        
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         [NotMapped]
         public IFormFile? ImageFile { get; set; }
-
-
-
-
     }
+
 }

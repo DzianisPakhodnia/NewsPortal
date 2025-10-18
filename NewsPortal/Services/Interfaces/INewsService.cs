@@ -6,7 +6,7 @@ namespace NewsPortal.Services.Interfaces
     {
         Task<IList<News>> GetAllNewsAsync();
         Task<News> GetNewsByIdAsync(int id);
-        Task<News> AddNewsAsync(News news);
+        Task<News> CreateNewsAsync(News news);
         Task UpdateNewsAsync(News news);
         Task DeleteNewsAsync(int id);
 

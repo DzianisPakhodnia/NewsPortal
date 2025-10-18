@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsPortal.Models;
-using NewsPortal.Services.Implementations;
 using NewsPortal.Services.Interfaces;
 
 namespace NewsPortal.Controllers
@@ -15,17 +14,6 @@ namespace NewsPortal.Controllers
             _adminService = adminService;
             _newsService = newsService;
         }
-        public async Task<IActionResult> Index()
-        {
-            var newsList = await _newsService.GetAllNewsAsync();
-            return View(newsList);
-        }
-
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
 
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
@@ -38,7 +26,7 @@ namespace NewsPortal.Controllers
 
             var admin = await _adminService.GetByEmailAsync(email);
 
-            if (admin == null || admin.PasswordHash != password) 
+            if (admin == null || admin.PasswordHash != password)
             {
                 ViewBag.Error = "Неверный email или пароль";
                 return View();
@@ -46,20 +34,62 @@ namespace NewsPortal.Controllers
 
             return RedirectToAction("Index");
         }
+
+        public async Task<IActionResult> Index()
+        {
+            var newsList = await _newsService.GetAllNewsAsync();
+            return View(newsList);
+        }
+
+        
+
+        
         [HttpPost]
         public async Task<IActionResult> CreateNews(News news)
         {
             if (!ModelState.IsValid)
                 return View(news);
 
+            await _newsService.CreateNewsAsync(news);
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult CreateNews()
+        {
+            return View(); 
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var newsItem = await _newsService.GetNewsByIdAsync(id);
+            if (newsItem == null)
+                return NotFound();
+
+            return View(newsItem); 
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(News news)
+        {
+            if (!ModelState.IsValid)
+                return View(news);
+
+            var existingNews = await _newsService.GetNewsByIdAsync(news.Id);
+            if (existingNews == null)
+                return NotFound();
+
+            existingNews.Title = news.Title;
+            existingNews.Subtitle = news.Subtitle;
+            existingNews.Text = news.Text;
+
             if (news.ImageFile != null && news.ImageFile.Length > 0)
             {
-                // создаём папку uploads, если её нет
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
-                // генерируем уникальное имя файла
                 var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(news.ImageFile.FileName);
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -68,19 +98,14 @@ namespace NewsPortal.Controllers
                     await news.ImageFile.CopyToAsync(stream);
                 }
 
-                // сохраняем относительный путь (для отображения в <img>)
-                news.ImageUrl = "/images/" + uniqueFileName;
+                existingNews.ImageUrl = "/uploads/" + uniqueFileName;
             }
 
-            await _newsService.AddNewsAsync(news);
+            await _newsService.UpdateNewsAsync(existingNews);
+
             return RedirectToAction("Index");
         }
 
-        [HttpGet]
-        public IActionResult CreateNews()
-        {
-            return View(); // ищет Views/Admin/CreateNews.cshtml
-        }
 
     }
 }
