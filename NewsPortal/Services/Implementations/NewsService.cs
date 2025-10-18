@@ -25,7 +25,12 @@ namespace NewsPortal.Services.Implementations
 
         public async Task<News> AddNewsAsync(News news)
         {
-            throw new NotImplementedException();
+            _newsRepository.AddNews(news);
+
+
+            
+
+            return news;
         }
 
         public  Task UpdateNewsAsync(News news)

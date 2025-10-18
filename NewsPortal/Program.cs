@@ -20,12 +20,7 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 
 builder.Services.AddControllersWithViews();
 
-
-
-
-
 var app = builder.Build();
-
 
 if (!app.Environment.IsDevelopment())
 {

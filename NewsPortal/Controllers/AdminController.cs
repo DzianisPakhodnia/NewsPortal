@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using NewsPortal.Models;
 using NewsPortal.Services.Implementations;
 using NewsPortal.Services.Interfaces;
 
@@ -44,6 +45,41 @@ namespace NewsPortal.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateNews(News news)
+        {
+            if (!ModelState.IsValid)
+                return View(news);
+
+            if (news.ImageFile != null && news.ImageFile.Length > 0)
+            {
+                // создаём папку uploads, если её нет
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // генерируем уникальное имя файла
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(news.ImageFile.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await news.ImageFile.CopyToAsync(stream);
+                }
+
+                // сохраняем относительный путь (для отображения в <img>)
+                news.ImageUrl = "/images/" + uniqueFileName;
+            }
+
+            await _newsService.AddNewsAsync(news);
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult CreateNews()
+        {
+            return View(); // ищет Views/Admin/CreateNews.cshtml
         }
 
     }
