@@ -1,18 +1,15 @@
 ﻿@model List<NewsPortal.Models.News>
 
 @{
-    ViewData["Title"] = "Новости";
+    ViewData["Title"] = "Управление новостями";
 }
-
-<link rel="stylesheet" href="~/css/news.css" asp-append-version="true" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <div class="container-fluid py-5 bg-light">
     <div class="container">
         <div class="row mb-5">
             <div class="col-12">
-                <h1 class="display-4 fw-bold text-primary mb-2">Новости</h1>
-                <p class="lead text-muted">Просматривайте все новости</p>
+                <h1 class="display-4 fw-bold text-primary mb-2">Управление новостями</h1>
+                <p class="lead text-muted">Редактируйте и управляйте новостями</p>
             </div>
         </div>
 
@@ -21,7 +18,6 @@
             <div class="text-center py-5">
                 <i class="bi bi-newspaper display-1 text-muted mb-3"></i>
                 <h3 class="text-muted">Новостей пока нет</h3>
-                <p class="text-muted mb-4">Пока нет опубликованных новостей</p>
             </div>
         }
         else
@@ -29,7 +25,7 @@
             <div class="row g-4">
                 @foreach (var news in Model)
                 {
-                    @await Html.PartialAsync("_NewsCard", news)
+                    @await Html.PartialAsync("_NewsCardAdmin", news)
                 }
             </div>
         }

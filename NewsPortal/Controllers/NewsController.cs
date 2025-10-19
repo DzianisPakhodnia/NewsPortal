@@ -17,17 +17,25 @@ namespace NewsPortal.Controllers
         public async Task<IActionResult> Index()
         {
             var newsList = await _newsService.GetAllNewsAsync();
-            return View(newsList);
+
+            var sortedNews = newsList.OrderByDescending(n => n.CreatedAt).ToList();
+
+            return View(sortedNews);
         }
 
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> RemoveNews(int id)
         {
-           
+            var newsItem = await _newsService.GetNewsByIdAsync(id);
+            if (newsItem == null)
+                return NotFound();
+
             await _newsService.DeleteNewsAsync(id);
 
-            return View();
+            return RedirectToAction("Index", "Admin");
         }
+
+
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -41,7 +49,7 @@ namespace NewsPortal.Controllers
             return View(newsItem);
         }
 
-
+        
 
         [HttpPut]
         public async Task<IActionResult> UpdateNews(News news)
@@ -63,5 +71,6 @@ namespace NewsPortal.Controllers
 
         }
 
+        
     }
 }

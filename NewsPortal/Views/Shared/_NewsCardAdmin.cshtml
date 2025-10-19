@@ -1,8 +1,26 @@
 ﻿@model NewsPortal.Models.News
 
 <div class="col-sm-6 col-lg-4">
-    <a href="@Url.Action("Details", "News", new { id = Model.Id })" class="text-decoration-none">
-        <div class="card news-admin-card h-100 border-0 shadow-hover">
+    <div class="card news-admin-card h-100 border-0 shadow-hover position-relative">
+
+        <!-- Панель действий: редактировать и удалить -->
+        <form asp-controller="News" asp-action="RemoveNews" asp-route-id="@Model.Id" method="post" class="position-absolute bottom-0 end-0 m-2 d-flex gap-2" style="z-index: 1000;">
+            <!-- Синий карандаш редактирования -->
+            <a href="@Url.Action("Edit", "Admin", new { id = Model.Id })"
+               class="text-decoration-none"
+               title="Редактировать">
+                <i class="bi bi-pencil fs-4 text-primary"></i>
+            </a>
+
+            <!-- Красное ведро удаления -->
+            <button type="submit" class="btn btn-link p-0 text-danger" title="Удалить"
+                    onclick="return confirm('Удалить эту новость?');">
+                <i class="bi bi-trash fs-4"></i>
+            </button>
+        </form>
+
+        <!-- Ссылка на детальный просмотр новости -->
+        <a href="@Url.Action("Details", "News", new { id = Model.Id })" class="text-decoration-none">
             <div class="card-image-container position-relative overflow-hidden @(string.IsNullOrEmpty(Model.ImageUrl) ? "bg-light d-flex align-items-center justify-content-center" : "")" style="height: 220px;">
                 @if (!string.IsNullOrEmpty(Model.ImageUrl))
                 {
@@ -33,6 +51,6 @@
                     </small>
                 </div>
             </div>
-        </div>
-    </a>
+        </a>
+    </div>
 </div>

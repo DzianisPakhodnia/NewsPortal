@@ -48,9 +48,35 @@ namespace NewsPortal.Services.Implementations
             return news;
         }
 
-        public  Task UpdateNewsAsync(News news)
+        public  async Task UpdateNewsAsync(News news)
         {
-            return _newsRepository.UpdateNews(news);
+            var existingNews = await _newsRepository.GetNewsById(news.Id);
+            if (existingNews == null) 
+            {
+                throw new Exception("Новость не найдена");
+            }
+
+            existingNews.Title = news.Title;
+            existingNews.Subtitle = news.Subtitle;
+            existingNews.Text = news.Text;
+            existingNews.UpdatedAt = DateTime.UtcNow;
+
+            if (news.ImageFile != null && news.ImageFile.Length > 0)
+            {
+                var fileName = Path.GetFileName(news.ImageFile.FileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/news", fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await news.ImageFile.CopyToAsync(stream);
+                }
+
+                existingNews.ImageUrl = "/images/news/" + fileName;
+            }
+
+
+            _newsRepository.UpdateNews(existingNews);
+
         }
 
         public Task DeleteNewsAsync(int id)

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 using NewsPortal.Models;
 using NewsPortal.Services.Interfaces;
 
@@ -8,28 +9,51 @@ namespace NewsPortal.Controllers
     {
         private readonly IAdminService _adminService;
         private readonly INewsService _newsService;
+        private readonly IValidator<News> _newsValidator;
+        private readonly IValidator<Admin> _adminValidator;
 
-        public AdminController(IAdminService adminService, INewsService newsService)
+        public AdminController(IAdminService adminService, INewsService newsService, 
+            IValidator<News> newsValidator, IValidator<Admin> adminValidator)
         {
             _adminService = adminService;
             _newsService = newsService;
+            _newsValidator = newsValidator;
+            _adminValidator = adminValidator;
+        }
+        // GET: /Admin/Login
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(Admin admin)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            var validationResult = await _adminValidator.ValidateAsync(admin);
+
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                {
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+                }
+                return View(admin);
+            }
+
+
+            if (string.IsNullOrEmpty(admin.Email) || string.IsNullOrEmpty(admin.PasswordHash))
             {
                 ViewBag.Error = "Email и пароль обязательны";
                 return View();
             }
 
-            var admin = await _adminService.GetByEmailAsync(email);
+            var existingAdmin = await _adminService.GetByEmailAsync(admin.Email);
 
-            if (admin == null || admin.PasswordHash != password)
+            if (existingAdmin == null || existingAdmin.PasswordHash != admin.PasswordHash)
             {
                 ViewBag.Error = "Неверный email или пароль";
-                return View();
+                return View(admin);
             }
 
             return RedirectToAction("Index");
@@ -41,14 +65,17 @@ namespace NewsPortal.Controllers
             return View(newsList);
         }
 
-        
-
-        
         [HttpPost]
         public async Task<IActionResult> CreateNews(News news)
         {
-            if (!ModelState.IsValid)
+            var validationResult = await _newsValidator.ValidateAsync(news);
+
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
                 return View(news);
+            }
 
             await _newsService.CreateNewsAsync(news);
             return RedirectToAction("Index");
@@ -70,41 +97,32 @@ namespace NewsPortal.Controllers
             return View(newsItem); 
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> Edit(News news)
+        public async Task<IActionResult> Edit(News model)
         {
-            if (!ModelState.IsValid)
-                return View(news);
+            var validationResult = await _newsValidator.ValidateAsync(model);
 
-            var existingNews = await _newsService.GetNewsByIdAsync(news.Id);
-            if (existingNews == null)
-                return NotFound();
-
-            existingNews.Title = news.Title;
-            existingNews.Subtitle = news.Subtitle;
-            existingNews.Text = news.Text;
-
-            if (news.ImageFile != null && news.ImageFile.Length > 0)
+            if (!validationResult.IsValid) 
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(news.ImageFile.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                foreach (var error in validationResult.Errors)
                 {
-                    await news.ImageFile.CopyToAsync(stream);
+                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
                 }
-
-                existingNews.ImageUrl = "/uploads/" + uniqueFileName;
+                
+                return View(model);
             }
 
-            await _newsService.UpdateNewsAsync(existingNews);
+            await _newsService.UpdateNewsAsync(model);
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Admin");
         }
+
+        
+
+
+        
+
 
 
     }

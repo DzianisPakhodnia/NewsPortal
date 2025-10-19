@@ -8,12 +8,8 @@ namespace NewsPortal.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Заголовок обязателен")]
         public string Title { get; set; }
-
         public string? Subtitle { get; set; }
-
-        [Required(ErrorMessage = "Текст обязателен")]
         public string Text { get; set; }
 
         public string? ImageUrl { get; set; }
