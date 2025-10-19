@@ -12,7 +12,6 @@ string? connection = builder.Configuration.GetConnectionString("DatabaseConnecti
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connection));
 
-
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
@@ -20,7 +19,17 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 
 builder.Services.AddControllersWithViews();
 
+
+
+
 var app = builder.Build();
+
+// јвто-миграци€: создаЄт таблицы, которых ещЄ нет, данные не тер€ютс€
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -37,6 +46,3 @@ app.MapControllerRoute(
     pattern: "{controller=News}/{action=Index}/{id?}");
 
 app.Run();
-        
-    
-

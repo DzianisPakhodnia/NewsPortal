@@ -34,16 +34,13 @@ namespace NewsPortal.Controllers
 
             return RedirectToAction("Index");
         }
-
+        
         public async Task<IActionResult> Index()
         {
             var newsList = await _newsService.GetAllNewsAsync();
             return View(newsList);
         }
 
-        
-
-        
         [HttpPost]
         public async Task<IActionResult> CreateNews(News news)
         {
@@ -105,7 +102,5 @@ namespace NewsPortal.Controllers
 
             return RedirectToAction("Index");
         }
-
-
     }
 }
