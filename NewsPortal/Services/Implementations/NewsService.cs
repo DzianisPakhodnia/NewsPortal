@@ -29,32 +29,21 @@ namespace NewsPortal.Services.Implementations
         {
             if (news.ImageFile != null && news.ImageFile.Length > 0)
             {
-                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(news.ImageFile.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await news.ImageFile.CopyToAsync(stream);
-
-                news.ImageUrl = "/images/" + fileName;
+                news.ImageUrl = await SaveImageAsync(news.ImageFile);
             }
 
             news.CreatedAt = DateTime.UtcNow;
-            await _newsRepository.AddNews(news);
+            news.UpdatedAt = DateTime.UtcNow;
 
+            await _newsRepository.AddNews(news);
             return news;
         }
 
-        public  async Task UpdateNewsAsync(News news)
+        public async Task UpdateNewsAsync(News news)
         {
             var existingNews = await _newsRepository.GetNewsById(news.Id);
-            if (existingNews == null) 
-            {
+            if (existingNews == null)
                 throw new Exception("Новость не найдена");
-            }
 
             existingNews.Title = news.Title;
             existingNews.Subtitle = news.Subtitle;
@@ -63,27 +52,50 @@ namespace NewsPortal.Services.Implementations
 
             if (news.ImageFile != null && news.ImageFile.Length > 0)
             {
-                var fileName = Path.GetFileName(news.ImageFile.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/news", fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                // Удаляем старое изображение
+                if (!string.IsNullOrEmpty(existingNews.ImageUrl))
                 {
-                    await news.ImageFile.CopyToAsync(stream);
+                    var oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, existingNews.ImageUrl.TrimStart('/'));
+                    if (File.Exists(oldFilePath))
+                        File.Delete(oldFilePath);
                 }
 
-                existingNews.ImageUrl = "/images/news/" + fileName;
+                existingNews.ImageUrl = await SaveImageAsync(news.ImageFile);
             }
 
-
-            _newsRepository.UpdateNews(existingNews);
-
+            await _newsRepository.UpdateNews(existingNews);
         }
 
-        public Task DeleteNewsAsync(int id)
+        public async Task DeleteNewsAsync(int id)
         {
-            return _newsRepository.DeleteNews(id);
+            var newsItem = await _newsRepository.GetNewsById(id);
+            if (newsItem == null)
+                throw new Exception("Новость не найдена");
+
+            if (!string.IsNullOrEmpty(newsItem.ImageUrl))
+            {
+                var filePath = Path.Combine(_webHostEnvironment.WebRootPath, newsItem.ImageUrl.TrimStart('/'));
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
+
+            await _newsRepository.DeleteNews(id);
         }
 
-        
+
+        private async Task<string> SaveImageAsync(IFormFile imageFile)
+        {
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images/news");
+            if (!Directory.Exists(uploadsFolder))
+                Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await imageFile.CopyToAsync(stream);
+
+            return "/images/news/" + fileName;
+        }
     }
 }

@@ -10,6 +10,8 @@ namespace NewsPortal.Services.Interfaces
         Task AddAsync(Admin admin);
         Task UpdateAsync(Admin admin);
         Task DeleteAsync(int id);
+        Task<bool> ValidateAdminAsync(string email, string password);
+
 
     }
 }
