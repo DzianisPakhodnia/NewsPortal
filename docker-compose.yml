@@ -10,7 +10,7 @@ services:
       - "80:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DatabaseConnection=Host=db;Port=5432;Database=NewsPortal;Username=gen_user;Password=NewsPortal;
+      - ConnectionStrings__DatabaseConnection=Host=newsportal_db;Port=5432;Database=NewsPortal;Username=gen_user;Password=NewsPortal;
     depends_on:
       - db
 
