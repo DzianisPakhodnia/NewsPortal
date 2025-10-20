@@ -1,74 +1,56 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NewsPortal.HelpModel;
 using NewsPortal.Models;
 using NewsPortal.Services.Interfaces;
-using System.Security.Claims;
 
 namespace NewsPortal.Controllers
 {
     [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
-
     public class AdminController : Controller
     {
-        private readonly IAdminService _adminService;
         private readonly INewsService _newsService;
         private readonly IValidator<News> _newsValidator;
-        private readonly IPasswordHasher<Admin> _passwordHasher;
+        private readonly IAuthenticationService _authService;
 
-        public AdminController(IAdminService adminService, INewsService newsService,
-            IValidator<News> newsValidator, IPasswordHasher<Admin> passwordHasher)
+        public AdminController(INewsService newsService,
+                               IValidator<News> newsValidator,
+                               IAuthenticationService authService)
         {
-            _adminService = adminService;
             _newsService = newsService;
             _newsValidator = newsValidator;
-            _passwordHasher = passwordHasher;
+            _authService = authService;
         }
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login()
-        {
-            return View();
-        }
+        public IActionResult Login() => View();
 
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            var admin = await _adminService.GetByEmailAsync(model.Email);
-            if (admin == null)
+            var success = await _authService.SignInAdminAsync(HttpContext, model.Email, model.Password);
+            if (!success)
             {
-                ViewBag.Error = "Неверный email или пароль";
+                ModelState.AddModelError("", "Неверный email или пароль");
                 return View(model);
             }
-
-            var result = _passwordHasher.VerifyHashedPassword(admin, admin.PasswordHash, model.Password);
-            if (result == PasswordVerificationResult.Failed)
-            {
-                ViewBag.Error = "Неверный email или пароль";
-                return View(model);
-            }
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, admin.Name),
-                new Claim(ClaimTypes.Email, admin.Email),
-                new Claim(ClaimTypes.Role, "Admin")
-            };
-
-            var identity = new ClaimsIdentity(claims, "AdminCookie");
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync("AdminCookie", principal);
 
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _authService.SignOutAdminAsync(HttpContext);
+            return RedirectToAction("Login");
         }
 
         public async Task<IActionResult> Index()
@@ -77,31 +59,15 @@ namespace NewsPortal.Controllers
             return View(newsList);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync("AdminCookie");
-            return RedirectToAction("Login");
-        }
-
         [HttpGet]
-        public IActionResult CreateNews()
-        {
-            return View();
-        }
+        public IActionResult CreateNews() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateNews(News news)
         {
-            var validationResult = await _newsValidator.ValidateAsync(news);
-
-            if (!validationResult.IsValid)
-            {
-                foreach (var error in validationResult.Errors)
-                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+            if (!await ValidateNewsAsync(news))
                 return View(news);
-            }
 
             await _newsService.CreateNewsAsync(news);
             return RedirectToAction("Index");
@@ -111,26 +77,29 @@ namespace NewsPortal.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var newsItem = await _newsService.GetNewsByIdAsync(id);
-            if (newsItem == null)
-                return NotFound();
-
-            return View(newsItem);
+            return newsItem == null ? NotFound() : View(newsItem);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(News model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(News news)
         {
-            var validationResult = await _newsValidator.ValidateAsync(model);
+            if (!await ValidateNewsAsync(news))
+                return View(news);
 
-            if (!validationResult.IsValid)
-            {
-                foreach (var error in validationResult.Errors)
-                    ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
-                return View(model);
-            }
-
-            await _newsService.UpdateNewsAsync(model);
+            await _newsService.UpdateNewsAsync(news);
             return RedirectToAction("Index");
+        }
+
+        private async Task<bool> ValidateNewsAsync(News news)
+        {
+            var validationResult = await _newsValidator.ValidateAsync(news);
+            if (validationResult.IsValid) return true;
+
+            foreach (var error in validationResult.Errors)
+                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+
+            return false;
         }
     }
 }
