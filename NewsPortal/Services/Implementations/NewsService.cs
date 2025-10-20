@@ -9,22 +9,36 @@ namespace NewsPortal.Services.Implementations
     {
         private readonly INewsRepository _newsRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly string _uploadsFolder;
 
         public NewsService(INewsRepository newsRepository, IWebHostEnvironment webHostEnvironment)
         {
             _newsRepository = newsRepository;
             _webHostEnvironment = webHostEnvironment;
+            _uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images/news");
+
+            if (!Directory.Exists(_uploadsFolder))
+                Directory.CreateDirectory(_uploadsFolder);
         }
 
-        public async Task<IList<News>> GetAllNewsAsync() => await _newsRepository.GetAllNews();
+        public async Task<IList<News>> GetAllNewsAsync()
+        {
+            var news = await _newsRepository.GetAllNews();
+            return news.OrderByDescending(n => n.CreatedAt).ToList();
+        }
 
-        public async Task<News> GetNewsByIdAsync(int id) => await _newsRepository.GetNewsById(id);
+        public async Task<News> GetNewsByIdAsync(int id)
+        {
+            var news = await _newsRepository.GetNewsById(id);
+            if (news == null) throw new KeyNotFoundException("Новость не найдена");
+            return news;
+        }
 
         public async Task<News> CreateNewsAsync(News news)
         {
-            news.ImageUrl = await HandleImageAsync(news.ImageFile);
             news.CreatedAt = DateTime.UtcNow;
             news.UpdatedAt = DateTime.UtcNow;
+            news.ImageUrl = await SaveOrUpdateImageAsync(news.ImageFile, null);
 
             await _newsRepository.AddNews(news);
             return news;
@@ -32,61 +46,63 @@ namespace NewsPortal.Services.Implementations
 
         public async Task UpdateNewsAsync(News news)
         {
-            var existingNews = await _newsRepository.GetNewsById(news.Id)
-                               ?? throw new KeyNotFoundException("Новость не найдена");
+            var existingNews = await GetNewsByIdAsync(news.Id);
 
             existingNews.Title = news.Title;
             existingNews.Subtitle = news.Subtitle;
             existingNews.Text = news.Text;
             existingNews.UpdatedAt = DateTime.UtcNow;
 
-            existingNews.ImageUrl = await HandleImageAsync(news.ImageFile, existingNews.ImageUrl);
+            existingNews.ImageUrl = await SaveOrUpdateImageAsync(news.ImageFile, existingNews.ImageUrl);
 
             await _newsRepository.UpdateNews(existingNews);
         }
 
         public async Task DeleteNewsAsync(int id)
         {
-            var newsItem = await _newsRepository.GetNewsById(id)
-                           ?? throw new KeyNotFoundException("Новость не найдена");
+            var news = await GetNewsByIdAsync(id);
 
-            DeleteImage(newsItem.ImageUrl);
+            await DeleteImageAsync(news.ImageUrl);
             await _newsRepository.DeleteNews(id);
         }
 
-        private async Task<string?> HandleImageAsync(IFormFile? imageFile, string? oldImageUrl = null)
-        {
-            if (!string.IsNullOrEmpty(oldImageUrl))
-                DeleteImage(oldImageUrl);
 
+        private async Task<string?> SaveOrUpdateImageAsync(IFormFile? imageFile, string? oldImageUrl)
+        {
             if (imageFile == null || imageFile.Length == 0)
                 return oldImageUrl;
+
+            if (!string.IsNullOrEmpty(oldImageUrl))
+                await DeleteImageAsync(oldImageUrl);
 
             return await SaveImageAsync(imageFile);
         }
 
         private async Task<string> SaveImageAsync(IFormFile imageFile)
         {
-            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images/news");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
-            var fileName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(uploadsFolder, fileName);
+            var fileName = $"{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
+            var filePath = Path.Combine(_uploadsFolder, fileName);
 
             await using var stream = new FileStream(filePath, FileMode.Create);
             await imageFile.CopyToAsync(stream);
 
-            return "/images/news/" + fileName;
+            return $"/images/news/{fileName}";
         }
 
-        private void DeleteImage(string? imageUrl)
+        private async Task DeleteImageAsync(string? imageUrl)
         {
             if (string.IsNullOrEmpty(imageUrl)) return;
 
-            var filePath = Path.Combine(_webHostEnvironment.WebRootPath, imageUrl.TrimStart('/'));
-            if (File.Exists(filePath))
-                File.Delete(filePath);
+            try
+            {
+                var filePath = Path.Combine(_webHostEnvironment.WebRootPath, imageUrl.TrimStart('/'));
+                if (File.Exists(filePath))
+                    await Task.Run(() => File.Delete(filePath));
+            }
+            catch
+            {
+                
+            }
         }
 
     }

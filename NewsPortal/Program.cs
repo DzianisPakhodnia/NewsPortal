@@ -27,6 +27,8 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IValidator<News>, NewsValidator>();
 builder.Services.AddScoped<IValidator<Admin>, AdminValidator>();
 builder.Services.AddScoped<IPasswordHasher<Admin>, PasswordHasher<Admin>>();
+builder.Services.AddScoped<NewsPortal.Services.Interfaces.IAuthenticationService, NewsPortal.Services.Implementations.AuthenticationService>();
+
 
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
