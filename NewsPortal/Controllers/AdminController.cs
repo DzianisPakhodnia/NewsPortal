@@ -26,7 +26,6 @@ namespace NewsPortal.Controllers
             _passwordHasher = passwordHasher;
         }
 
-        // Доступна анонимно
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Login()
@@ -55,7 +54,6 @@ namespace NewsPortal.Controllers
                 return View(model);
             }
 
-            // Создание Claims с ролью Admin
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, admin.Name),
@@ -71,7 +69,6 @@ namespace NewsPortal.Controllers
             return RedirectToAction("Index");
         }
 
-        // Только для авторизованных админов
         [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
         public async Task<IActionResult> Index()
         {
@@ -96,6 +93,7 @@ namespace NewsPortal.Controllers
 
         [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateNews(News news)
         {
             var validationResult = await _newsValidator.ValidateAsync(news);

@@ -10,6 +10,5 @@ namespace NewsPortal.Repositories.Interfaces
         Task UpdateNews(News news);
         Task DeleteNews(int id);
 
-
     }
 }

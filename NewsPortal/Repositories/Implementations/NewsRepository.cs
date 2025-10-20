@@ -41,10 +41,13 @@ namespace NewsPortal.Repositories.Implementations
             return await _applicationDbContext.News.FindAsync(id);
         }
 
+        
+
         public async Task UpdateNews(News news)
         {
             _applicationDbContext.News.Update(news);
             await _applicationDbContext.SaveChangesAsync();
         }
+      
     }
 }

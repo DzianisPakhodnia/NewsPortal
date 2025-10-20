@@ -97,5 +97,7 @@ namespace NewsPortal.Services.Implementations
 
             return "/images/news/" + fileName;
         }
+        
+
     }
 }
