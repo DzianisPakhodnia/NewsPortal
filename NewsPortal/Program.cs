@@ -48,7 +48,7 @@ builder.Services.AddAuthentication("AdminCookie")
     {
         options.LoginPath = "/Admin/Login";
         options.AccessDeniedPath = "/Admin/Login";
-        options.Cookie.Name = "AdminAuthCookie";
+        options.Cookie.Name = "AdminCookie";
         options.ExpireTimeSpan = TimeSpan.FromHours(1);
     });
 
@@ -69,6 +69,8 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
 }
+
+
 
 if (!app.Environment.IsDevelopment())
 {

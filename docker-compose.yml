@@ -1,6 +1,32 @@
+version: "3.9"
+
 services:
   newsportal:
-    image: ${DOCKER_REGISTRY-}newsportal
+    image: newsportal:latest
     build:
       context: .
       dockerfile: NewsPortal/Dockerfile
+    container_name: newsportal_app
+    ports:
+      - "5015:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DatabaseConnection=Host=db;Port=5432;Database=NewsPortal;Username=gen_user;Password=NewsPortal;
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: newsportal_db
+    restart: always
+    environment:
+      POSTGRES_DB: NewsPortal
+      POSTGRES_USER: gen_user
+      POSTGRES_PASSWORD: NewsPortal
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
