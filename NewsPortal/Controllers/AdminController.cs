@@ -10,6 +10,8 @@ using System.Security.Claims;
 
 namespace NewsPortal.Controllers
 {
+    [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
+
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
@@ -69,14 +71,12 @@ namespace NewsPortal.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
         public async Task<IActionResult> Index()
         {
             var newsList = await _newsService.GetAllNewsAsync();
             return View(newsList);
         }
 
-        [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -84,14 +84,12 @@ namespace NewsPortal.Controllers
             return RedirectToAction("Login");
         }
 
-        [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
         [HttpGet]
         public IActionResult CreateNews()
         {
             return View();
         }
 
-        [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateNews(News news)
@@ -109,7 +107,6 @@ namespace NewsPortal.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -120,7 +117,6 @@ namespace NewsPortal.Controllers
             return View(newsItem);
         }
 
-        [Authorize(Roles = "Admin", AuthenticationSchemes = "AdminCookie")]
         [HttpPost]
         public async Task<IActionResult> Edit(News model)
         {

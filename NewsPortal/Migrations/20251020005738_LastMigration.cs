@@ -5,7 +5,7 @@
 namespace NewsPortal.Migrations
 {
     /// <inheritdoc />
-    public partial class SecondCreate : Migration
+    public partial class LastMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

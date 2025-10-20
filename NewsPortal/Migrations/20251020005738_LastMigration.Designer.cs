@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace NewsPortal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251019210706_DeleteUserEntity3")]
-    partial class DeleteUserEntity3
+    [Migration("20251020005738_LastMigration")]
+    partial class LastMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
