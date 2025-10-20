@@ -1,21 +1,23 @@
+# Этап сборки
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-# Копируем csproj и восстанавливаем зависимости
-COPY *.csproj ./
-RUN dotnet restore NewsPortal.csproj
+# Копируем csproj отдельно для кеширования зависимостей
+COPY NewsPortal/NewsPortal.csproj ./NewsPortal/
+RUN dotnet restore ./NewsPortal/NewsPortal.csproj
 
-# Копируем весь проект
-COPY . ./
+# Копируем остальной код проекта
+COPY NewsPortal/. ./NewsPortal/
 
-# Сборка
-RUN dotnet build NewsPortal.csproj -c Release -o /app/build
+# Сборка и публикация
+WORKDIR /src/NewsPortal
+RUN dotnet build -c Release -o /app/build
+RUN dotnet publish -c Release -o /app/publish
 
-# Публикация
-RUN dotnet publish NewsPortal.csproj -c Release -o /app/publish
-
-# Финальный runtime-образ
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Финальный образ
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "NewsPortal.dll"]
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "NewsPortal.dll]()
