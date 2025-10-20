@@ -1,22 +1,20 @@
-# Используем SDK вместо runtime
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-
 WORKDIR /app
 
 # Копируем csproj и восстанавливаем зависимости
 COPY *.csproj ./
-RUN dotnet restore
+RUN dotnet restore NewsPortal.csproj
 
 # Копируем весь проект
 COPY . ./
 
-# Сборка проекта
-RUN dotnet build -c Release -o /app/build
+# Сборка
+RUN dotnet build NewsPortal.csproj -c Release -o /app/build
 
 # Публикация
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish NewsPortal.csproj -c Release -o /app/publish
 
-# Финальный образ (можно использовать runtime, если EF уже применены)
+# Финальный runtime-образ
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
