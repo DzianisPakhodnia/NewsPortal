@@ -1,3 +1,3 @@
-Веб-приложение доступно по адресу http://newsportal.tw1.ru  
+Веб-приложение доступно по адресу http://newsportal.tw1.ru (http://)  
 Вход для админа admin@admin.com  
 Пароль admin
