@@ -1,23 +1,24 @@
-# Этап сборки
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+FROM mcr.microsoft.com/dotnet/sdk:8.0
 
-# Копируем csproj отдельно для кеширования зависимостей
+WORKDIR /app
+
+# Копируем проект
 COPY NewsPortal/NewsPortal.csproj ./NewsPortal/
 RUN dotnet restore ./NewsPortal/NewsPortal.csproj
 
-# Копируем остальной код проекта
 COPY NewsPortal/. ./NewsPortal/
 
-# Сборка и публикация
-WORKDIR /src/NewsPortal
+WORKDIR /app/NewsPortal
+
+# Сборка и публикация (можно оставить, но внутри SDK контейнера можно и build и ef)
 RUN dotnet build -c Release -o /app/build
 RUN dotnet publish -c Release -o /app/publish
 
-# Финальный образ
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
-WORKDIR /app
-COPY --from=build /app/publish .
+# Установка dotnet-ef
+RUN dotnet tool install --global dotnet-ef --version 8.0.0
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Запуск приложения
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "NewsPortal.dll"]
+ENTRYPOINT ["dotnet", "/app/publish/NewsPortal.dll"]
