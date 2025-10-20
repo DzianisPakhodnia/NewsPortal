@@ -13,6 +13,8 @@ services:
       - ConnectionStrings__DatabaseConnection=Host=newsportal_db;Port=5432;Database=NewsPortal;Username=gen_user;Password=NewsPortal;
     depends_on:
       - db
+    volumes:
+      - ./wwwroot/images:/app/wwwroot/images  
 
   db:
     image: postgres:15
